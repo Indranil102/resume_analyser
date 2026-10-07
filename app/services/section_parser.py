@@ -33,6 +33,30 @@ def split_into_sections(document: Document):
         line = line.strip()
         if not line:
             continue
-        if line in S
-
+        if line in SECTIONS:
+            if current_content:
+                sections.append(
+                    Document(
+                        page_content="\n".join(current_content),
+                        metadata={
+                            **document.metadata,
+                            "section": current_section
+                        }
+                    )
+                )
+            current_section=line
+            current_content=[]
+        else:
+            current_content.append(line)
+    if current_content:
+        sections.append(
+            Document(
+                page_content='\n'.join(current_content),
+                metadata={
+                    **document.metadata,
+                    "section": current_section
+                }
+            )
+        )
+    return sections
     
