@@ -1,5 +1,5 @@
 import re
-
+from app.services.pdf_loader import load_pdf
 from langchain_core.documents import Document
 
 SECTIONS=[
@@ -24,7 +24,7 @@ def split_into_sections(document: Document):
     """
     text= document.page_content
     sections=[]
-    current_section="Header"
+    current_section="HEADER"
     current_content=[]
     
     lines=text.splitlines()
@@ -59,4 +59,23 @@ def split_into_sections(document: Document):
             )
         )
     return sections
-    
+
+if __name__ == "__main__":
+
+    documents = load_pdf("data/resumes/Indranil.pdf")
+
+    sections = split_into_sections(documents[0])
+
+    print(f"Total sections: {len(sections)}")
+
+    for i, section in enumerate(sections):
+
+        print(f"\n========== SECTION {i + 1} ==========")
+
+        print("SECTION:", section.metadata["section"])
+        
+        print("CHARACTERS:", len(section.page_content))
+
+        print("\nCONTENT:")
+
+        print(section.page_content)

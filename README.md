@@ -35,3 +35,9 @@ currently in text_spliiter file i am working with this
                           ↓
                        Chunks
                 
+So for our project, we'll use:
+Rules first
++
+Recursive splitter as fallback
++
+LLM only when genuinely useful
