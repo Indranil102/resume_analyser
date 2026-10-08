@@ -67,3 +67,35 @@ def split_projects(section: Document):
         
         if not line:
             continue
+        is_new_project= any(
+            line.startswith(marker)
+            for marker in project_markers
+        )
+        
+        if is_new_project and current_content:
+            
+            chunks.append(
+                Document(
+                    page_content="\n".join(current_content),
+                    metadata={
+                        **section.metadata,
+                        'subsection':'projects'
+                    }
+                )
+            )
+            
+            current_content=[]
+            
+            current_content.append(line)
+    if current_content:
+        chunks.append(
+            Document(
+                page_content="\n".join(current_content),
+                metadata={
+                    **section.metadata,
+                    'subsection':'projects'
+                }
+            )
+        )
+        
+    return chunks

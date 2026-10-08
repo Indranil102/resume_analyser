@@ -41,3 +41,5 @@ Rules first
 Recursive splitter as fallback
 +
 LLM only when genuinely useful
+
+step 5 pip install sentence-transformers
