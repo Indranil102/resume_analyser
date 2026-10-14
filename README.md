@@ -43,3 +43,7 @@ Recursive splitter as fallback
 LLM only when genuinely useful
 
 step 5 pip install sentence-transformers
+
+infaiss search we are calculating the faiss distance 
+to check which is more relavent to other 
+don't use similarity search same as faiss distance this are two diff things
