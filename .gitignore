@@ -28,5 +28,8 @@ dist/
 /data/resumes/*
 !/data/resumes/.gitkeep
 
+# Generated FAISS vector store
+/data/faiss_index/
+
 # macOS
 .DS_Store
