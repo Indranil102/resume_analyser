@@ -1,5 +1,7 @@
 from langchain_core.documents import Document
+from app.services.pdf_loader import load_pdf
 
+from app.services.section_parser import split_into_sections
 def split_experience(section:Document):
     text= section.page_content
     
@@ -99,3 +101,28 @@ def split_projects(section: Document):
         )
         
     return chunks
+
+def create_chunks(filepath:str):
+    
+    documents= load_pdf(filepath)
+    
+    all_chunks=[]
+    
+    for document in documents:
+        sections= split_into_sections(document)
+        
+        for section in sections:
+            section_name= section.metadata['section']
+            
+            if section_name== "EXPERIENCE":
+                chunks= split_experience(section)
+                
+            elif section_name=="PROJECTS":
+                chunks= split_projects(section)
+            else:
+                
+                chunks=[section]
+                
+            all_chunks.extend(chunks)
+            
+    return all_chunks
