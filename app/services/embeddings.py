@@ -11,9 +11,18 @@ def create_embeddings():
 
 
 if __name__=="__main__":
-    mmodel= create_embeddings()
+    model= create_embeddings()
     texts = [
         "Python developer with machine learning experience",
         "Experienced Python programmer working on ML projects",
         "I enjoy playing football"
     ]
+    
+    vectors= model.embed_documents(texts)
+    for text, vector in zip(texts,vectors):
+        print("===========TEXT===========")
+        print(f"Text: {text}")
+        print(f"Vector length: {len(vector)}")
+        print("FIRST 5 values:")
+        print(vector[:5])
+        print()
