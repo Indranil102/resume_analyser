@@ -147,6 +147,7 @@ def create_chunks(filepath:str):
             
     return all_chunks
 
+
 if __name__ == "__main__":
     from app.services.pdf_loader import load_pdf
     from app.services.section_parser import split_into_sections
@@ -154,8 +155,21 @@ if __name__ == "__main__":
     documents = load_pdf("data/resumes/Indranil.pdf")
 
     for document in documents:
-        for section in split_into_sections(document):
-            if section.metadata["section"] == "EXPERIENCE":
-                for chunk in split_experience(section):
-                    print("\nMetadata:", chunk.metadata)
-                    print(chunk.page_content)
+        sections = split_into_sections(document)
+
+        for section in sections:
+            section_name = section.metadata["section"]
+
+            if section_name == "EXPERIENCE":
+                chunks = split_experience(section)
+
+            elif section_name == "PROJECTS":
+                chunks = split_projects(section)
+
+            else:
+                continue
+
+            for chunk in chunks:
+                print("\n" + "=" * 60)
+                print("Metadata:", chunk.metadata)
+                print(chunk.page_content)
