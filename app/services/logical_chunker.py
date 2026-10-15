@@ -2,54 +2,69 @@ from langchain_core.documents import Document
 from app.services.pdf_loader import load_pdf
 
 from app.services.section_parser import split_into_sections
-def split_experience(section:Document):
-    text= section.page_content
-    
-    markers=[
+
+
+from langchain_core.documents import Document
+
+
+def split_experience(section: Document):
+    text = section.page_content
+
+    markers = [
         "AI/ML and Python Intern",
-        "Software Developer Intern"
+        "Software Developer Intern",
     ]
-    
-    chunks=[]
-    
-    current_content=[]
-    
+
+    chunks = []
+    current_content = []
+
+    def save_chunk(lines):
+        if not lines:
+            return
+
+        chunk_text = "\n".join(lines)
+
+        if "Emeelan Solution" in chunk_text:
+            company = "Emeelan Solution"
+        elif "DevFrame Studio" in chunk_text:
+            company = "DevFrame Studio"
+        else:
+            company = None
+
+        role = lines[0]
+
+        chunks.append(
+            Document(
+                page_content=chunk_text,
+                metadata={
+                    **section.metadata,
+                    "subsection": "experience",
+                    "role": role,
+                    "company": company,
+                },
+            )
+        )
+
     for line in text.splitlines():
-        line= line.strip()
-        
+        line = line.strip()
+
         if not line:
             continue
-        
-        is_new_job= any(
+
+        is_new_job = any(
             line.startswith(marker)
             for marker in markers
         )
-        
+
         if is_new_job and current_content:
-            chunks.append(
-                Document(
-                    page_content="\n".join(current_content),
-                    metadata={
-                        **section.metadata,
-                        'subsection':'experience'
-                    }
-                )
-            )
-            
-            current_content=[]
-            
+            save_chunk(current_content)
+            current_content = []
+
         current_content.append(line)
-    if current_content:
-        
-        chunks.append(
-            Document(
-                page_content="\n".join(current_content),
-                metadata={
-                    **section.metadata,
-                    'subsection':'experience'
-                }
-            )
-        )
+
+    # Save the final job
+    save_chunk(current_content)
+
     return chunks
 
 def split_projects(section: Document):
@@ -63,42 +78,47 @@ def split_projects(section: Document):
     chunks=[]
     
     current_content=[]
+    current_project=None
+    
+    def save_chunk():
+        if not current_content:
+            return
+        
+        chunks.append(
+            Document(
+                page_content="\n".join(current_content),
+                metadata={
+                    **section.metadata,
+                    'subsection':'projects',
+                    "project": current_project
+                }
+            )
+        )
     
     for line in text.splitlines():
         line= line.strip()
         
         if not line:
             continue
-        is_new_project= any(
-            line.startswith(marker)
-            for marker in project_markers
+        matched_project= next(
+            (
+                marker
+                for marker in project_markers
+                if line.startswith(marker)
+            ),
+            None
         )
-        
-        if is_new_project and current_content:
-            
-            chunks.append(
-                Document(
-                    page_content="\n".join(current_content),
-                    metadata={
-                        **section.metadata,
-                        'subsection':'projects'
-                    }
-                )
-            )
-            
+        if matched_project:
+            save_chunk()
             current_content=[]
+            current_project= matched_project
+        current_content.append(line)
+    
+    
+    save_chunk()
+        
             
-            current_content.append(line)
-    if current_content:
-        chunks.append(
-            Document(
-                page_content="\n".join(current_content),
-                metadata={
-                    **section.metadata,
-                    'subsection':'projects'
-                }
-            )
-        )
+            
         
     return chunks
 
@@ -126,3 +146,16 @@ def create_chunks(filepath:str):
             all_chunks.extend(chunks)
             
     return all_chunks
+
+if __name__ == "__main__":
+    from app.services.pdf_loader import load_pdf
+    from app.services.section_parser import split_into_sections
+
+    documents = load_pdf("data/resumes/Indranil.pdf")
+
+    for document in documents:
+        for section in split_into_sections(document):
+            if section.metadata["section"] == "EXPERIENCE":
+                for chunk in split_experience(section):
+                    print("\nMetadata:", chunk.metadata)
+                    print(chunk.page_content)
